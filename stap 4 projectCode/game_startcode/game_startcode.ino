@@ -36,6 +36,27 @@ int toestand = TELAF;
 unsigned long toestandStartTijd = 0;
 
 /*****************************************
+   functies die je gebruikt maken
+ *****************************************/
+// code die steeds wordt uitgevoerd in toestand TELAF
+void telafLoop() {
+  digitalWrite(pinLedA, HIGH);
+  // tel af
+}
+
+// code die steeds wordt uitgevoerd in toestand SPEEL
+void speelLoop() {
+    digitalWrite(pinLedA, LOW);
+  // speel spel
+}
+
+// code die steeds wordt uitgevoerd in toestand SPEEL
+void winLoop() {
+  // toon wie gewonnen heeft
+}
+
+
+/*****************************************
    setup() en loop()
  *****************************************/
 
@@ -57,11 +78,31 @@ void loop() {
   knopRood = digitalRead(pinKnopRood);
   knopGroen = digitalRead(pinKnopGroen);
 
-  
-  if (knopRood == HIGH || knopGroen == HIGH) {
-    digitalWrite(pinLedA, HIGH);
-  } else {
-    digitalWrite(pinLedA, LOW);
+  // bepaal toestand
+  if (toestand == TELAF) {
+    telafLoop();
+    if (millis() - toestandStartTijd > 2000) { // 2 seconden voorbij
+      toestandStartTijd = millis();
+      toestand = SPEEL;
+      Serial.println("Nieuwe toestand: SPEEL");
+    }
+  }
+  if (toestand == SPEEL) {
+    speelLoop();
+    if (millis() - toestandStartTijd > 5000) { // 5 seconden voorbij
+      toestandStartTijd = millis();
+      toestand = WIN;
+      Serial.println("Nieuwe toestand: WIN");
+    }
+  }
+  if (toestand == WIN) {
+    winLoop();
+    if (millis() - toestandStartTijd > 1000 &&  // 1 seconde voorbij en
+        knopRood == HIGH && knopGroen == HIGH) {       // beide knoppen ingedrukt
+      toestandStartTijd = millis();
+      toestand = TELAF;
+      Serial.println("Nieuwe toestand: TELAF");
+    }
   }
 
   // kleine vertraging, 100 keer per seconde loopen is genoeg
